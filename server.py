@@ -11,12 +11,30 @@ ENCODING = 'utf-8'
 
 
 def main():
+
     address = socket.gethostbyname(socket.gethostname())
     HOST_INFO = (address, PORT)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(HOST_INFO)
     print("[SERVER STARTED] Github server starting ....")
     start(s)
+
+
+
+def load_users_information():
+    rows = []
+    mydict = {}
+    with open('accounts.csv', 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            rows.append(row)
+
+    for row in rows[:]:
+        if len(row) > 1:
+            mydict[row[0]] = row[1]
+
+    return mydict
+
 
 def start(server):
     server.listen()
@@ -37,6 +55,8 @@ def handle_client(conn, address ,server):
 
         if msg == "Login":
             login(conn)
+            # if i == -1:
+            #     conn.close()
 
         if msg == "Register":
             register(conn)
@@ -62,20 +82,30 @@ def login(conn):
     password = receive_msg(conn)
     print("username is {}".format(username))
     print("password is {}".format(password))
-    send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor")
-    operation=receive_msg(conn)
-    if operation == "create repository":
-        print("[REQUEST] create repository")
-        create_repository(conn,username)
-    if operation == "commit & push":
-        print("[REQUEST] commit & push")
-        commit_push(conn,username)
-    if operation == "add contributor":
-        print("[REQUEST] add contributor")
-        add_contibutor_to_repository(conn,username)
-    if operation == "pull":
-        print("[REQUEST] pull")
-        pull(conn,username)
+    dictionary=load_users_information()
+
+
+    if username in dictionary.keys() and password == dictionary[username]:
+
+        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor")
+        operation=receive_msg(conn)
+        if operation == "create repository":
+            print("[REQUEST] create repository")
+            create_repository(conn,username)
+        if operation == "commit & push":
+            print("[REQUEST] commit & push")
+            commit_push(conn,username)
+        if operation == "add contributor":
+            print("[REQUEST] add contributor")
+            add_contibutor_to_repository(conn,username)
+        if operation == "pull":
+            print("[REQUEST] pull")
+            pull(conn,username)
+
+        # return 0
+    else:
+        send_msg(conn,"Login unsuccessful - invalid username or password")
+        print("invalid username or password")
 
 
 
@@ -193,21 +223,27 @@ def create_repository(conn,username):
     send_msg(conn,"repository created successfully")
 
 def register(conn):
+
+    dictionary=load_users_information()
     print("[REQUEST] Register")
     send_msg(conn, "Please enter your user name and passcode")
     username = receive_msg(conn)
-    password = receive_msg(conn)
-    print("username is {}".format(username))
-    print("password is {}".format(password))
-    parent="server-side"
-    path=os.path.join(parent,username)
-    os.mkdir(path)
+    if username not in dictionary.keys():
+        send_msg(conn, "username available!")
+        password = receive_msg(conn)
+        print("username is {}".format(username))
+        print("password is {}".format(password))
+        parent="server-side"
+        path=os.path.join(parent,username)
+        os.mkdir(path)
 
-    List=[username,password]
-    with open('accounts.csv', 'a') as f_object:
-        writer_object = csv.writer(f_object)
-        writer_object.writerow(List)
-        f_object.close()
+        List=[username,password]
+        with open('accounts.csv', 'a') as f_object:
+            writer_object = csv.writer(f_object)
+            writer_object.writerow(List)
+            f_object.close()
+    else:
+        send_msg(conn,"This username is already taken")
 
 def receive_msg(conn):
     message_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))

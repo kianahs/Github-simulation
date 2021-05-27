@@ -1,6 +1,7 @@
 import socket
 import os
 import datetime
+import csv
 PORT = 7447
 MESSAGE_LENGTH_SIZE = 64
 ENCODING = 'utf-8'
@@ -15,6 +16,9 @@ def main():
     choose_operation(s)
 
     send_msg(s, "DISCONNECT")
+
+
+
 
 
 def send_msg(client, msg):
@@ -34,9 +38,13 @@ def choose_operation(s):
     if request == "Register":
         register(s)
 
+
     elif request == "Login":
         username=login(s)
-        receive_msg(s)
+        msg=receive_msg(s)
+        if msg=="Login unsuccessful - invalid username or password":
+            return
+
         request=input()
 
         if request == "create repository":
@@ -170,6 +178,9 @@ def register(s):
     print("password")
     password = input()
     send_msg(s, username)
+    msg = receive_msg(s)
+    if msg == "This username is already taken":
+        return
     send_msg(s, password)
     directory = username
     parent_dir = "C://Users//kiana//Desktop//university//term 6//Network//projects//Git_project//client-side"
