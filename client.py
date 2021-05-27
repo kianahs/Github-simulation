@@ -28,26 +28,41 @@ def choose_operation(s):
 
     print("Enter operation Login or Register")
     request=input()
+    send_msg(s, request)
 
     if request == "Register":
-        send_msg(s,request)
-        receive_msg(s)
-        print("username")
-        username=input()
-        print("password")
-        password=input()
-        send_msg(s,username)
-        send_msg(s,password)
+        register(s)
 
     elif request == "Login":
-        send_msg(s,request)
+        username=login(s)
         receive_msg(s)
-        print("username")
-        username=input()
-        print("password")
-        password=input()
-        send_msg(s,username)
-        send_msg(s,password)
+        request=input()
+
+        if request == "create repository":
+            send_msg(s, request)
+            print("sent cr")
+            create_repository(s,username)
+
+
+def login(s):
+
+    receive_msg(s)
+    print("username")
+    username = input()
+    print("password")
+    password = input()
+    send_msg(s, username)
+    send_msg(s, password)
+    return username
+
+def register(s):
+    receive_msg(s)
+    print("username")
+    username = input()
+    print("password")
+    password = input()
+    send_msg(s, username)
+    send_msg(s, password)
 
 
 def receive_msg(client):
@@ -55,6 +70,17 @@ def receive_msg(client):
     message_length = int(client.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
     msg = client.recv(message_length).decode(ENCODING)
     print(msg)
+
+def create_repository(s,username):
+    receive_msg(s)
+    repositoryName=input()
+    repositoryName=username+" "+repositoryName
+    send_msg(s,repositoryName)
+    receive_msg(s)
+
+
+
+
 
 
 if __name__ == '__main__':

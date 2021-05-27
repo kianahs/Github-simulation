@@ -31,34 +31,16 @@ def handle_client(conn, address ,server):
     Connected = True
 
     while Connected:
-
-        message_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
-
-        msg = conn.recv(message_length).decode(ENCODING)
+        msg=receive_msg(conn)
 
         print("[MESSAGE RECEIVED] {}".format(msg))
 
         if msg == "Login":
-            print("[REQUEST] Login")
-            send_msg(conn, "Please enter your user name and passcode")
-            username_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
-            username = conn.recv(username_length).decode(ENCODING)
-            password_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
-            password = conn.recv(password_length).decode(ENCODING)
-            print("username is {}".format(username))
-            print("password is {}".format(password))
+            login(conn)
 
         if msg == "Register":
+            register(conn)
 
-            print("[REQUEST] Register")
-            send_msg(conn, "Please enter your user name and passcode")
-            username_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
-            username = conn.recv(username_length).decode(ENCODING)
-            password_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
-            password = conn.recv(password_length).decode(ENCODING)
-            print("username is {}".format(username))
-            print("password is {}".format(password))
-            register(username,password)
 
         if msg == "DISCONNECT":
             Connected = False
@@ -74,22 +56,46 @@ def send_msg(conn, msg):
     conn.send(msg_length)
     conn.send(message)
 
-def register(username , password):
+def login(conn):
+    print("[REQUEST] Login")
+    send_msg(conn, "Please enter your user name and passcode")
+    username = receive_msg(conn)
+    password = receive_msg(conn)
+    print("username is {}".format(username))
+    print("password is {}".format(password))
+    send_msg(conn, "login successfull \n choose your operation \n pull-push-commit-create repository")
+    operation=receive_msg(conn)
+    if operation == "create repository":
+        print("[REQUEST] create repository")
+        create_repository(conn)
+
+def create_repository(conn):
+    send_msg(conn, "please enter your repository name")
+    repositoryName=receive_msg(conn)
+    repositoryName+=".txt"
+    f = open(repositoryName, "w")
+    f.close()
+    send_msg(conn,"repository created successfully")
+
+
+def register(conn):
+    print("[REQUEST] Register")
+    send_msg(conn, "Please enter your user name and passcode")
+    username = receive_msg(conn)
+    password = receive_msg(conn)
+    print("username is {}".format(username))
+    print("password is {}".format(password))
 
     List=[username,password]
     with open('accounts.csv', 'a') as f_object:
-        # Pass this file object to csv.writer()
-        # and get a writer object
         writer_object = csv.writer(f_object)
-
-        # Pass the list as an argument into
-        # the writerow()
         writer_object.writerow(List)
-
-        # Close the file object
         f_object.close()
 
-
+def receive_msg(conn):
+    message_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
+    msg = conn.recv(message_length).decode(ENCODING)
+    return msg
 
 
 if __name__ == '__main__':
