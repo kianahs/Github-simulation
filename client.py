@@ -11,7 +11,8 @@ def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(SERVER_INFO)
 
-    send_msg(s, "HELLO WORLD!!")
+    choose_operation(s)
+
     send_msg(s, "DISCONNECT")
 
 
@@ -22,6 +23,20 @@ def send_msg(client, msg):
     msg_length += b' ' * (MESSAGE_LENGTH_SIZE - len(msg_length))
     client.send(msg_length)
     client.send(message)
+
+def choose_operation(s):
+
+    print("Enter operation Login or Register")
+    request=input()
+
+    if request == "Register":
+        print("username")
+        username=input()
+        print("password")
+        password=input()
+        send_msg(s,request)
+        send_msg(s,username)
+        send_msg(s,password)
 
 
 if __name__ == '__main__':
