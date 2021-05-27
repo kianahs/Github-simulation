@@ -45,22 +45,69 @@ def choose_operation(s):
         if request == "commit & push":
             send_msg(s,request)
             commit_push(s,username)
+        if request == "add contributor":
+            send_msg(s,request)
+            add_contributor_to_repository(s,username)
+        if request == "pull":
+            send_msg(s,request)
+            pull(s,username)
+
+
+def pull(s,username):
+    pass
+
+
+
+def add_contributor_to_repository(s,username):
+    receive_msg(s)
+    send_msg(s, input())
+    receive_msg(s)
+    send_msg(s, input())
+    receive_msg(s)
+    send_msg(s, input())
+
+
+def convert_file_to_text(path):
+    f = open(path, 'r')
+    Lines = f.readlines()
+    text=""
+    for line in Lines:
+        text += line+"\n"
+
+    return text
 
 
 
 def commit_push(s,username):
+
     receive_msg(s)
     repository=input()
     send_msg(s, repository)
+
+    print("enter directory path")
+    directory = input()
+
     receive_msg(s)
-    send_msg(s, input())
-    receive_msg(s)
-    send_msg(s,input())
+    # print(len(os.listdir(directory)))
+    send_msg(s, str(len(os.listdir(directory))))
+
+    for filename in os.listdir(directory):
+        f = os.path.join(directory, filename)
+        if os.path.isfile(f):
+            print(f)
+            send_msg(s,filename)
+            send_msg(s,convert_file_to_text(f))
+
+
+
     receive_msg(s)
     commit=input()
     send_msg(s,commit)
     time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
     receive_msg(s)
+
+
+
     parent_directory="client-side"
     parent_directory=os.path.join(parent_directory,username)
     directory=os.path.join(parent_directory,"commits")
@@ -70,6 +117,8 @@ def commit_push(s,username):
     f.write(commit+" "+time)
     f.write("\n")
     f.close()
+
+
 
 
 

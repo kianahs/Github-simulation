@@ -3,6 +3,7 @@ import threading
 import csv
 import os
 import datetime
+from distutils.dir_util import copy_tree
 
 PORT = 7447
 MESSAGE_LENGTH_SIZE = 64
@@ -17,7 +18,6 @@ def main():
     print("[SERVER STARTED] Github server starting ....")
     start(s)
 
-
 def start(server):
     server.listen()
 
@@ -25,7 +25,6 @@ def start(server):
         conn, address = server.accept()
         t = threading.Thread(target=handle_client, args=(conn, address, server))
         t.start()
-
 
 def handle_client(conn, address ,server):
     print("[NEW CONNECTION] connected from {}".format(address))
@@ -47,7 +46,6 @@ def handle_client(conn, address ,server):
             Connected = False
 
     conn.close()
-
 
 def send_msg(conn, msg):
     message = msg.encode(ENCODING)
@@ -72,37 +70,80 @@ def login(conn):
     if operation == "commit & push":
         print("[REQUEST] commit & push")
         commit_push(conn,username)
+    if operation == "add contributor":
+        print("[REQUEST] add contributor")
+        add_contibutor_to_repository(conn,username)
+    if operation == "pull":
+        print("[REQUEST] pull")
+        pull(conn,username)
+
+
+
+def pull(conn,username):
+
+    send_msg(conn,"please enter owners username ")
+    owner_username=receive_msg(conn)
+    send_msg(conn,"please enter requested repository name")
+    requested_repository=receive_msg(conn)
+
+    parent_dir="server-side"
+    parent_dir=os.path.join(parent_dir,owner_username)
+    dir=os.path.join(parent_dir,requested_repository)
+
+    parent="client-side"
+    parent=os.path.join(parent,username)
+    directory=os.path.join(parent,"pulled-Repositories")
+    directory=os.path.join(directory,requested_repository)
+
+
+    copy_tree(dir, directory)
+
+
+
+def add_contibutor_to_repository(conn,username):
+    send_msg(conn,"enter repository name")
+    repository=receive_msg(conn)
+    send_msg(conn,"enter contributor username")
+    c_username=receive_msg(conn)
+    parent_dir="server-side"
+    parent_dir=os.path.join(parent_dir,username)
+    filename="access "+repository+".txt"
+    directory=os.path.join(parent_dir,filename)
+    f=open(directory,'a')
+    f.write(c_username+"\n")
+    f.close()
+    send_msg(conn,"contributor added successfully")
 
 def commit_push(conn,username):
 
     parent_directory="server-side"
     parent_directory=os.path.join(parent_directory,username)
     commit_path=parent_directory
+
     send_msg(conn,"please choose your repository")
-    repository =receive_msg(conn)
-    parent_directory=os.path.join(parent_directory,repository)
-    send_msg(conn,"please enter file path")
-    path = receive_msg(conn)
-    send_msg(conn, "please enter file name")
-    filename = receive_msg(conn)
+    repository = receive_msg(conn)
+    parent_directory = os.path.join(parent_directory,repository)
+    send_msg(conn,"enter number of push files")
+    number = int(receive_msg(conn))
+    time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
+
+    for i in range(number):
+
+        file_name = receive_msg(conn)
+        directory=os.path.join(parent_directory,file_name)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        destination_file_name = "version " + time + ".txt"
+        path=os.path.join(directory,destination_file_name)
+        file_content = receive_msg(conn)
+        f=open(path,'w')
+        f.write(file_content)
+        f.close()
+
+
     send_msg(conn,"please enter your commit")
     commit = receive_msg(conn)
-
-    directory=os.path.join(parent_directory,filename)
-    # print(directory)
-    time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
-    destination_file_name = "version " + time + ".txt"
-    dest_path=os.path.join(directory,destination_file_name)
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-
-    with open(path, 'r') as firstfile, open(dest_path, 'a') as secondfile:
-        for line in firstfile:
-            secondfile.write(line)
-    firstfile.close()
-    secondfile.close()
     commitFileName="commit"+"-"+repository+".txt"
     commitFileName=os.path.join(commit_path,commitFileName)
     commit+=" "
@@ -126,10 +167,10 @@ def create_repository(conn,username):
     access_file="access "+directory+".txt"
     access_file=os.path.join(path1,access_file)
     f=open(access_file,"w")
-    f.write(username)
+    f.write(username+"\n")
+    # f.write("\n")
     f.close()
     send_msg(conn,"repository created successfully")
-
 
 def register(conn):
     print("[REQUEST] Register")
