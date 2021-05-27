@@ -1,5 +1,6 @@
 import socket
-
+import os
+import datetime
 PORT = 7447
 MESSAGE_LENGTH_SIZE = 64
 ENCODING = 'utf-8'
@@ -40,8 +41,36 @@ def choose_operation(s):
 
         if request == "create repository":
             send_msg(s, request)
-            print("sent cr")
             create_repository(s,username)
+        if request == "commit & push":
+            send_msg(s,request)
+            commit_push(s,username)
+
+
+
+def commit_push(s,username):
+    receive_msg(s)
+    repository=input()
+    send_msg(s, repository)
+    receive_msg(s)
+    send_msg(s, input())
+    receive_msg(s)
+    send_msg(s,input())
+    receive_msg(s)
+    commit=input()
+    send_msg(s,commit)
+    time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
+    receive_msg(s)
+    parent_directory="client-side"
+    parent_directory=os.path.join(parent_directory,username)
+    directory=os.path.join(parent_directory,"commits")
+    repository+=".txt"
+    commits_file_path=os.path.join(directory,repository)
+    f=open(commits_file_path , 'a')
+    f.write(commit+" "+time)
+    f.write("\n")
+    f.close()
+
 
 
 def login(s):
@@ -63,6 +92,21 @@ def register(s):
     password = input()
     send_msg(s, username)
     send_msg(s, password)
+    directory = username
+    parent_dir = "C://Users//kiana//Desktop//university//term 6//Network//projects//Git_project//client-side"
+    path = os.path.join(parent_dir, directory)
+    os.mkdir(path)
+    subDir="pulled-Repositories"
+    path2=os.path.join(path,subDir)
+    os.mkdir(path2)
+    subDir="commits"
+    path2 = os.path.join(path, subDir)
+    os.mkdir(path2)
+    subDir = "codes"
+    path2 = os.path.join(path, subDir)
+    os.mkdir(path2)
+
+
 
 
 def receive_msg(client):
@@ -74,7 +118,6 @@ def receive_msg(client):
 def create_repository(s,username):
     receive_msg(s)
     repositoryName=input()
-    repositoryName=username+" "+repositoryName
     send_msg(s,repositoryName)
     receive_msg(s)
 
