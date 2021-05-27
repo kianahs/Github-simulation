@@ -54,8 +54,38 @@ def choose_operation(s):
 
 
 def pull(s,username):
-    pass
 
+    receive_msg(s)
+    send_msg(s,input())
+
+    receive_msg(s)
+    repository=input()
+    send_msg(s,repository)
+
+    number_folder=int(receive_msg(s))
+
+    parent_directory="client-side"
+    parent_directory=os.path.join(parent_directory,username)
+    parent_directory=os.path.join(parent_directory,"pulled-Repositories")
+    parent_directory=os.path.join(parent_directory,repository)
+
+    for i in range(number_folder):
+
+        folder_name = receive_msg(s)
+        number_files = int(receive_msg(s))
+        directory = os.path.join(parent_directory, folder_name)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        for j in range(number_files):
+
+            file_name=receive_msg(s)
+            path = os.path.join(directory, file_name)
+            file_content = receive_msg(s)
+            f = open(path, 'w')
+            f.write(file_content)
+            f.close()
 
 
 def add_contributor_to_repository(s,username):
@@ -163,6 +193,7 @@ def receive_msg(client):
     message_length = int(client.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
     msg = client.recv(message_length).decode(ENCODING)
     print(msg)
+    return msg
 
 def create_repository(s,username):
     receive_msg(s)

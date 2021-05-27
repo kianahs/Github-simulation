@@ -88,17 +88,37 @@ def pull(conn,username):
 
     parent_dir="server-side"
     parent_dir=os.path.join(parent_dir,owner_username)
-    dir=os.path.join(parent_dir,requested_repository)
+    directory=os.path.join(parent_dir,requested_repository)
 
-    parent="client-side"
-    parent=os.path.join(parent,username)
-    directory=os.path.join(parent,"pulled-Repositories")
-    directory=os.path.join(directory,requested_repository)
+    send_msg(conn , str(len(os.listdir(directory))))
+
+    for foldername in os.listdir(directory):
+        # print("folder name {}".format(foldername))
+        f = directory
+        f = os.path.join(directory, foldername)
+        send_msg(conn , foldername)
+        send_msg(conn, str(len(os.listdir(f))))
+
+        for filename in os.listdir(f):
+            # print("innnnnnnnnn {}".format(filename))
+            f2 = os.path.join(f, filename)
+            if os.path.isfile(f2):
+                print(f2)
+                send_msg(conn, filename)
+                send_msg(conn, convert_file_to_text(f2))
 
 
-    copy_tree(dir, directory)
+    send_msg(conn,"repository pulled successfully")
 
 
+def convert_file_to_text(path):
+    f = open(path, 'r')
+    Lines = f.readlines()
+    text=""
+    for line in Lines:
+        text += line+"\n"
+
+    return text
 
 def add_contibutor_to_repository(conn,username):
     send_msg(conn,"enter repository name")
