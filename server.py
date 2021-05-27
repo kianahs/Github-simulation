@@ -1,7 +1,7 @@
 import socket
 import threading
 import csv
-
+import os
 
 PORT = 7447
 MESSAGE_LENGTH_SIZE = 64
@@ -71,10 +71,10 @@ def login(conn):
 
 def create_repository(conn):
     send_msg(conn, "please enter your repository name")
-    repositoryName=receive_msg(conn)
-    repositoryName+=".txt"
-    f = open(repositoryName, "w")
-    f.close()
+    directory=receive_msg(conn)
+    parent_dir="C://Users//kiana//Desktop//university//term 6//Network//projects//Git_project//repositories"
+    path = os.path.join(parent_dir, directory)
+    os.mkdir(path)
     send_msg(conn,"repository created successfully")
 
 
