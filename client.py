@@ -30,13 +30,31 @@ def choose_operation(s):
     request=input()
 
     if request == "Register":
+        send_msg(s,request)
+        receive_msg(s)
         print("username")
         username=input()
         print("password")
         password=input()
-        send_msg(s,request)
         send_msg(s,username)
         send_msg(s,password)
+
+    elif request == "Login":
+        send_msg(s,request)
+        receive_msg(s)
+        print("username")
+        username=input()
+        print("password")
+        password=input()
+        send_msg(s,username)
+        send_msg(s,password)
+
+
+def receive_msg(client):
+
+    message_length = int(client.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
+    msg = client.recv(message_length).decode(ENCODING)
+    print(msg)
 
 
 if __name__ == '__main__':
