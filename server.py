@@ -125,6 +125,8 @@ def create_sub_directory(conn,username):
     directory=receive_msg(conn)
     send_msg(conn,"1.owner 2.contributor")
     value=receive_msg(conn)
+    send_msg(conn, "1.directory 2.file")
+    choose = receive_msg(conn)
 
     if value == "1":
         parent_dir="server-side"
@@ -132,10 +134,16 @@ def create_sub_directory(conn,username):
         send_msg(conn,"enter repository name")
         repository=receive_msg(conn)
         parent_dir=os.path.join(parent_dir,repository)
-        directory=os.path.join(parent_dir,directory)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        send_msg(conn,"sub directory created!")
+        directory = os.path.join(parent_dir, directory)
+
+        if choose=="1":
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            send_msg(conn,"sub directory created!")
+        elif choose == "2":
+            f=open(directory,"w")
+            f.close()
+            send_msg(conn, "file created!")
 
     elif value == "2":
         send_msg(conn,"enter owner username")
@@ -149,9 +157,15 @@ def create_sub_directory(conn,username):
             send_msg(conn, "access granted")
             parent_dir = os.path.join(parent_dir, repository)
             directory = os.path.join(parent_dir, directory)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            send_msg(conn,"sub directory created!")
+            if choose == "1":
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+                send_msg(conn,"sub directory created!")
+            elif choose == "2":
+                f = open(directory, "w")
+                f.close()
+                send_msg(conn, "file created!")
+
         elif access == 1:
             print("access failed")
             send_msg(conn,"access failed")

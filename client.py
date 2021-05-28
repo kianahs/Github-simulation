@@ -84,6 +84,9 @@ def create_sub_directory(s,username):
     value=input()
     send_msg(s, value)
 
+    receive_msg(s)
+    send_msg(s, input())
+
     if value == "1":
         receive_msg(s)
         send_msg(s, input())
