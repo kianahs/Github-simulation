@@ -3,6 +3,8 @@ import threading
 import csv
 import os
 import datetime
+import time
+import operator
 from distutils.dir_util import copy_tree
 
 PORT = 7447
@@ -87,7 +89,7 @@ def login(conn):
 
     if username in dictionary.keys() and password == dictionary[username]:
 
-        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor-show commits")
+        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor-show commits-sync")
         operation=receive_msg(conn)
         if operation == "create repository":
             print("[REQUEST] create repository")
@@ -103,11 +105,73 @@ def login(conn):
         if operation == "pull":
             print("[REQUEST] pull")
             pull(conn,username)
+        if operation == "sync":
+            print("[REQUEST] Sync")
+            check_sync(conn,username)
 
         # return 0
     else:
         send_msg(conn,"Login unsuccessful - invalid username or password")
         print("invalid username or password")
+
+
+
+
+
+
+
+def check_sync(conn,username):
+    folder_modify={}
+    send_msg(conn,"enter owner of repository")
+    owner=receive_msg(conn)
+    send_msg(conn,"enter repository name")
+    repository=receive_msg(conn)
+    send_msg(conn,"enter the file name for checking")
+    filename=receive_msg(conn)
+
+    parent_dir="server-side"
+    parent_dir=os.path.join(parent_dir,owner)
+    parent_dir=os.path.join(parent_dir,repository)
+
+    for foldername in os.listdir(parent_dir):
+
+        if filename in foldername:
+            path=os.path.join(parent_dir,foldername)
+            folder_modify[foldername]=time.ctime(os.path.getmtime(path))
+
+    max_folder_name = max(folder_modify, key=folder_modify.get)
+    print(max_folder_name)
+    directory=os.path.join(parent_dir,max_folder_name)
+    elements =os.listdir(directory)
+    maximum = elements[0]
+    for file in os.listdir(directory):
+
+       if time.ctime(os.path.getmtime(os.path.join(directory,file))) > time.ctime(os.path.getmtime(os.path.join(directory,maximum))):
+           maximum = file
+
+    print(maximum)
+    target_file_content=convert_file_to_text(os.path.join(directory,maximum))
+    receive_file_content=receive_msg(conn)
+    f2 = open("1.txt","w")
+    f2.write(receive_file_content)
+    f3 = open("2.txt", "w")
+    f3.write(target_file_content)
+    f2.close()
+    f3.close()
+    if target_file_content == receive_file_content:
+        send_msg(conn,"file is already update!")
+
+    else:
+        send_msg(conn,"file is not update - sync")
+        send_msg(conn,target_file_content)
+
+
+
+
+
+
+
+
 
 
 

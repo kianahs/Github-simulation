@@ -67,6 +67,53 @@ def choose_operation(s):
             print("enter repository name")
             repository=input()
             show_commits(username,repository)
+        if request == "sync":
+            send_msg(s,request)
+            sync(s,username)
+
+
+def sync(s,username):
+    receive_msg(s)
+    send_msg(s,input())
+
+    receive_msg(s)
+    send_msg(s, input())
+
+    receive_msg(s)
+    file_name=input()
+    send_msg(s, file_name)
+
+    print("enter directory path")
+    path=input()
+
+    content=convert_file_to_text(path)
+    send_msg(s,content)
+
+    sync_check=receive_msg(s)
+
+    if sync_check == "file is already update!":
+        return
+    else:
+        updated_content =receive_msg(s)
+        f=open(path,"w")
+        f.write(updated_content)
+        f.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def pull(s,username):
@@ -142,6 +189,7 @@ def commit_push(s,username,value):
             f = os.path.join(directory, filename)
             if os.path.isfile(f):
                 print(f)
+                filename = filename.replace(".txt", "")
                 send_msg(s,filename)
                 send_msg(s,convert_file_to_text(f))
 
@@ -186,6 +234,7 @@ def commit_push(s,username,value):
             f = os.path.join(directory, filename)
             if os.path.isfile(f):
                 print(f)
+                filename=filename.replace(".txt","")
                 send_msg(s, filename)
                 send_msg(s, convert_file_to_text(f))
 
