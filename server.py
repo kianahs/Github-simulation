@@ -121,6 +121,7 @@ def login(conn):
 
 
 def check_sync(conn,username):
+
     folder_modify={}
     send_msg(conn,"enter owner of repository")
     owner=receive_msg(conn)
@@ -152,26 +153,12 @@ def check_sync(conn,username):
     print(maximum)
     target_file_content=convert_file_to_text(os.path.join(directory,maximum))
     receive_file_content=receive_msg(conn)
-    f2 = open("1.txt","w")
-    f2.write(receive_file_content)
-    f3 = open("2.txt", "w")
-    f3.write(target_file_content)
-    f2.close()
-    f3.close()
     if target_file_content == receive_file_content:
         send_msg(conn,"file is already update!")
 
     else:
         send_msg(conn,"file is not update - sync")
         send_msg(conn,target_file_content)
-
-
-
-
-
-
-
-
 
 
 
