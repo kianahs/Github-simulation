@@ -89,7 +89,7 @@ def login(conn):
 
     if username in dictionary.keys() and password == dictionary[username]:
 
-        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor-show commits-sync")
+        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub directory-add contributor-show commits-sync")
         operation=receive_msg(conn)
         if operation == "create repository":
             print("[REQUEST] create repository")
@@ -108,13 +108,53 @@ def login(conn):
         if operation == "sync":
             print("[REQUEST] Sync")
             check_sync(conn,username)
-
+        if operation == "create sub directory":
+            print("[REQUEST] create sub directory")
+            create_sub_directory(conn,username)
         # return 0
     else:
         send_msg(conn,"Login unsuccessful - invalid username or password")
         print("invalid username or password")
 
 
+
+
+
+def create_sub_directory(conn,username):
+    send_msg(conn,"enter directory name")
+    directory=receive_msg(conn)
+    send_msg(conn,"1.owner 2.contributor")
+    value=receive_msg(conn)
+
+    if value == "1":
+        parent_dir="server-side"
+        parent_dir=os.path.join(parent_dir,username)
+        send_msg(conn,"enter repository name")
+        repository=receive_msg(conn)
+        parent_dir=os.path.join(parent_dir,repository)
+        directory=os.path.join(parent_dir,directory)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        send_msg(conn,"sub directory created!")
+
+    elif value == "2":
+        send_msg(conn,"enter owner username")
+        owner=receive_msg(conn)
+        parent_dir = "server-side"
+        parent_dir = os.path.join(parent_dir, owner)
+        send_msg(conn,"enter repository name")
+        repository = receive_msg(conn)
+        access=check_access(owner,username,repository)
+        if access == 0 :
+            send_msg(conn, "access granted")
+            parent_dir = os.path.join(parent_dir, repository)
+            directory = os.path.join(parent_dir, directory)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            send_msg(conn,"sub directory created!")
+        elif access == 1:
+            print("access failed")
+            send_msg(conn,"access failed")
 
 
 

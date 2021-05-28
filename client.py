@@ -19,8 +19,6 @@ def main():
 
 
 
-
-
 def send_msg(client, msg):
     message = msg.encode(ENCODING)
     msg_length = len(message)
@@ -70,6 +68,39 @@ def choose_operation(s):
         if request == "sync":
             send_msg(s,request)
             sync(s,username)
+        if request == "create sub directory":
+            send_msg(s,request)
+            create_sub_directory(s,username)
+
+
+
+
+
+def create_sub_directory(s,username):
+    receive_msg(s)
+    send_msg(s,input())
+
+    receive_msg(s)
+    value=input()
+    send_msg(s, value)
+
+    if value == "1":
+        receive_msg(s)
+        send_msg(s, input())
+        receive_msg(s)
+
+    elif value == "2":
+        receive_msg(s)
+        send_msg(s, input())
+        receive_msg(s)
+        send_msg(s, input())
+
+        access = receive_msg(s)
+        if access == "access failed":
+            return
+        receive_msg(s)
+
+
 
 
 def sync(s,username):
@@ -98,21 +129,6 @@ def sync(s,username):
         f=open(path,"w")
         f.write(updated_content)
         f.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
