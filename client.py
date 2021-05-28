@@ -52,13 +52,21 @@ def choose_operation(s):
             create_repository(s,username)
         if request == "commit & push":
             send_msg(s,request)
-            commit_push(s,username)
+            receive_msg(s)
+            value=input()
+            send_msg(s,value)
+            commit_push(s,username,value)
+
         if request == "add contributor":
             send_msg(s,request)
             add_contributor_to_repository(s,username)
         if request == "pull":
             send_msg(s,request)
             pull(s,username)
+        if request == "show commits":
+            print("enter repository name")
+            repository=input()
+            show_commits(username,repository)
 
 
 def pull(s,username):
@@ -116,45 +124,88 @@ def convert_file_to_text(path):
 
 
 
-def commit_push(s,username):
+def commit_push(s,username,value):
 
-    receive_msg(s)
-    repository=input()
-    send_msg(s, repository)
+    if value == "1":
+        receive_msg(s)
+        repository=input()
+        send_msg(s, repository)
 
-    print("enter directory path")
-    directory = input()
+        print("enter directory path")
+        directory = input()
 
-    receive_msg(s)
-    # print(len(os.listdir(directory)))
-    send_msg(s, str(len(os.listdir(directory))))
+        receive_msg(s)
+        # print(len(os.listdir(directory)))
+        send_msg(s, str(len(os.listdir(directory))))
 
-    for filename in os.listdir(directory):
-        f = os.path.join(directory, filename)
-        if os.path.isfile(f):
-            print(f)
-            send_msg(s,filename)
-            send_msg(s,convert_file_to_text(f))
+        for filename in os.listdir(directory):
+            f = os.path.join(directory, filename)
+            if os.path.isfile(f):
+                print(f)
+                send_msg(s,filename)
+                send_msg(s,convert_file_to_text(f))
+
+        receive_msg(s)
+        commit=input()
+        send_msg(s,commit)
+        time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
+        receive_msg(s)
+
+        parent_directory="client-side"
+        parent_directory=os.path.join(parent_directory,username)
+        directory=os.path.join(parent_directory,"commits")
+        repository+=".txt"
+        commits_file_path=os.path.join(directory,repository)
+        f=open(commits_file_path , 'a')
+        f.write(commit+" "+time)
+        f.write("\n")
+        f.close()
+
+    elif value == "2":
+
+        receive_msg(s)
+        send_msg(s,input())
+
+        receive_msg(s)
+        repository = input()
+        send_msg(s, repository)
+
+        access=receive_msg(s)
+
+        if access == "access failed":
+            return
+
+        print("enter directory path")
+        directory = input()
+
+        receive_msg(s)
+        # print(len(os.listdir(directory)))
+        send_msg(s, str(len(os.listdir(directory))))
+
+        for filename in os.listdir(directory):
+            f = os.path.join(directory, filename)
+            if os.path.isfile(f):
+                print(f)
+                send_msg(s, filename)
+                send_msg(s, convert_file_to_text(f))
+
+        receive_msg(s)
+        commit = input()
+        send_msg(s, commit)
+        time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
+        receive_msg(s)
+
+        parent_directory = "client-side"
+        parent_directory = os.path.join(parent_directory, username)
+        directory = os.path.join(parent_directory, "commits")
+        repository += ".txt"
+        commits_file_path = os.path.join(directory, repository)
+        f = open(commits_file_path, 'a')
+        f.write(commit + " " + time)
+        f.write("\n")
+        f.close()
 
 
-
-    receive_msg(s)
-    commit=input()
-    send_msg(s,commit)
-    time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
-    receive_msg(s)
-
-
-
-    parent_directory="client-side"
-    parent_directory=os.path.join(parent_directory,username)
-    directory=os.path.join(parent_directory,"commits")
-    repository+=".txt"
-    commits_file_path=os.path.join(directory,repository)
-    f=open(commits_file_path , 'a')
-    f.write(commit+" "+time)
-    f.write("\n")
-    f.close()
 
 
 
@@ -183,7 +234,7 @@ def register(s):
         return
     send_msg(s, password)
     directory = username
-    parent_dir = "C://Users//kiana//Desktop//university//term 6//Network//projects//Git_project//client-side"
+    parent_dir = "client-side"
     path = os.path.join(parent_dir, directory)
     os.mkdir(path)
     subDir="pulled-Repositories"
@@ -212,7 +263,13 @@ def create_repository(s,username):
     send_msg(s,repositoryName)
     receive_msg(s)
 
-
+def show_commits(username,repository):
+    parent_dir="client-side"
+    parent_dir=os.path.join(parent_dir,username)
+    parent_dir=os.path.join(parent_dir,"commits")
+    repository+=".txt"
+    dir=os.path.join(parent_dir,repository)
+    print(convert_file_to_text(dir))
 
 
 

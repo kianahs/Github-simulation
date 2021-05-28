@@ -87,14 +87,16 @@ def login(conn):
 
     if username in dictionary.keys() and password == dictionary[username]:
 
-        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor")
+        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub repository-add contributor-show commits")
         operation=receive_msg(conn)
         if operation == "create repository":
             print("[REQUEST] create repository")
             create_repository(conn,username)
         if operation == "commit & push":
             print("[REQUEST] commit & push")
-            commit_push(conn,username)
+            send_msg(conn,"1.owner of repository 2.contributor")
+            value=receive_msg(conn)
+            commit_push(conn,username,value)
         if operation == "add contributor":
             print("[REQUEST] add contributor")
             add_contibutor_to_repository(conn,username)
@@ -164,47 +166,93 @@ def add_contibutor_to_repository(conn,username):
     f.close()
     send_msg(conn,"contributor added successfully")
 
-def commit_push(conn,username):
+def commit_push(conn,username,value):
+    if value=="1":
+        parent_directory="server-side"
+        parent_directory=os.path.join(parent_directory,username)
+        commit_path=parent_directory
 
-    parent_directory="server-side"
-    parent_directory=os.path.join(parent_directory,username)
-    commit_path=parent_directory
+        send_msg(conn,"please choose your repository")
+        repository = receive_msg(conn)
+        parent_directory = os.path.join(parent_directory,repository)
+        send_msg(conn,"enter number of push files")
+        number = int(receive_msg(conn))
+        time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
 
-    send_msg(conn,"please choose your repository")
-    repository = receive_msg(conn)
-    parent_directory = os.path.join(parent_directory,repository)
-    send_msg(conn,"enter number of push files")
-    number = int(receive_msg(conn))
-    time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
+        for i in range(number):
 
-    for i in range(number):
+            file_name = receive_msg(conn)
+            directory=os.path.join(parent_directory,file_name)
 
-        file_name = receive_msg(conn)
-        directory=os.path.join(parent_directory,file_name)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            destination_file_name = "version " + time + ".txt"
+            path=os.path.join(directory,destination_file_name)
+            file_content = receive_msg(conn)
+            f=open(path,'w')
+            f.write(file_content)
+            f.close()
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        destination_file_name = "version " + time + ".txt"
-        path=os.path.join(directory,destination_file_name)
-        file_content = receive_msg(conn)
-        f=open(path,'w')
-        f.write(file_content)
+
+        send_msg(conn,"please enter your commit")
+        commit = receive_msg(conn)
+        commitFileName="commit"+"-"+repository+".txt"
+        commitFileName=os.path.join(commit_path,commitFileName)
+        commit+=" "
+        list=[commit,time]
+        f=open(commitFileName, 'a')
+        for item in list:
+            f.write(item)
+        f.write("\n")
         f.close()
 
+        send_msg(conn,"commit and push done successfully!")
 
-    send_msg(conn,"please enter your commit")
-    commit = receive_msg(conn)
-    commitFileName="commit"+"-"+repository+".txt"
-    commitFileName=os.path.join(commit_path,commitFileName)
-    commit+=" "
-    list=[commit,time]
-    f=open(commitFileName, 'a')
-    for item in list:
-        f.write(item)
-    f.write("\n")
-    f.close()
+    elif value=="2":
 
-    send_msg(conn,"commit and push done successfully!")
+        send_msg(conn,"enter owner of repository")
+        owner=receive_msg(conn)
+        send_msg(conn, "enter repository name")
+        repository=receive_msg(conn)
+        access=check_access(owner,username,repository)
+        if access == 1:
+            send_msg(conn,"access failed")
+            print("user doesnt have access to this repository")
+        elif access == 0:
+            send_msg(conn, "access granted")
+            parent_directory = "server-side"
+            parent_directory = os.path.join(parent_directory, owner)
+            commit_path = parent_directory
+            parent_directory = os.path.join(parent_directory, repository)
+            send_msg(conn, "enter number of push files")
+            number = int(receive_msg(conn))
+            time = str(datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S"))
+            for i in range(number):
+
+                file_name = receive_msg(conn)
+                file_name = username+"-"+file_name
+                directory = os.path.join(parent_directory,file_name)
+
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+                destination_file_name = "version " + time + ".txt"
+                path=os.path.join(directory,destination_file_name)
+                file_content = receive_msg(conn)
+                f=open(path,'w')
+                f.write(file_content)
+                f.close()
+            send_msg(conn, "please enter your commit")
+            commit = receive_msg(conn)
+            commitFileName = username + "-commit" + "-" + repository + ".txt"
+            commitFileName = os.path.join(commit_path, commitFileName)
+            commit += " "
+            list = [commit, time]
+            f = open(commitFileName, 'a')
+            for item in list:
+                f.write(item)
+            f.write("\n")
+            f.close()
+            send_msg(conn, "commit and push done successfully!")
 
 def create_repository(conn,username):
     send_msg(conn, "please enter your repository name")
@@ -217,7 +265,7 @@ def create_repository(conn,username):
     access_file="access "+directory+".txt"
     access_file=os.path.join(path1,access_file)
     f=open(access_file,"w")
-    f.write(username+"\n")
+    f.write(username)
     # f.write("\n")
     f.close()
     send_msg(conn,"repository created successfully")
@@ -249,6 +297,18 @@ def receive_msg(conn):
     message_length = int(conn.recv(MESSAGE_LENGTH_SIZE).decode(ENCODING))
     msg = conn.recv(message_length).decode(ENCODING)
     return msg
+
+def check_access(owner,username,repository):
+    parent_dir="server-side"
+    parent_dir=os.path.join(parent_dir,owner)
+    repository="access "+repository+".txt"
+    dir=os.path.join(parent_dir,repository)
+    content=convert_file_to_text(dir)
+    if username in content:
+        return 0
+    else:
+        return 1
+
 
 
 if __name__ == '__main__':
