@@ -89,7 +89,7 @@ def login(conn):
 
     if username in dictionary.keys() and password == dictionary[username]:
 
-        send_msg(conn, "login successfull \n choose your operation \n pull-commit & push-create repository-create sub directory-add contributor-show commits-sync")
+        send_msg(conn, "login successfull \nchoose your operation \n1.pull\n2.commit & push\n3.create repository\n4.create sub directory\n5.add contributor\n6.show commits\n7.sync\n")
         operation=receive_msg(conn)
         if operation == "create repository":
             print("[REQUEST] create repository")
@@ -181,6 +181,13 @@ def check_sync(conn,username):
     owner=receive_msg(conn)
     send_msg(conn,"enter repository name")
     repository=receive_msg(conn)
+    type=check_access(owner,"private",repository)
+    access=check_access(owner,username,repository)
+    if type==0 and access==1:
+        send_msg(conn,"private repository access failed!")
+        return
+    else:
+        send_msg(conn,"private repository access granted")
     send_msg(conn,"enter the file name for checking")
     filename=receive_msg(conn)
 
@@ -224,7 +231,13 @@ def pull(conn,username):
     owner_username=receive_msg(conn)
     send_msg(conn,"please enter requested repository name")
     requested_repository=receive_msg(conn)
-
+    type=check_access(owner_username,"private",requested_repository)
+    access=check_access(owner_username,username,requested_repository)
+    if type == 0 and access == 1 :
+        send_msg(conn,"private repository access failed!")
+        return
+    else:
+        send_msg(conn, "private repository access granted")
     parent_dir="server-side"
     parent_dir=os.path.join(parent_dir,owner_username)
     directory=os.path.join(parent_dir,requested_repository)
@@ -369,6 +382,8 @@ def commit_push(conn,username,value):
 def create_repository(conn,username):
     send_msg(conn, "please enter your repository name")
     directory=receive_msg(conn)
+    send_msg(conn, "public or private")
+    show = receive_msg(conn)
     parent_dir="server-side"
     path1 = os.path.join(parent_dir, username)
     path = os.path.join(path1,directory)
@@ -377,6 +392,8 @@ def create_repository(conn,username):
     access_file="access "+directory+".txt"
     access_file=os.path.join(path1,access_file)
     f=open(access_file,"w")
+    if show == "private":
+        f.write(show)
     f.write(username)
     # f.write("\n")
     f.close()

@@ -43,34 +43,35 @@ def choose_operation(s):
         if msg=="Login unsuccessful - invalid username or password":
             return
 
-        request=input()
+        while True:
+            print("select operation")
+            request = input()
+            if request == "3":
+                send_msg(s, "create repository")
+                create_repository(s,username)
+            if request == "2":
+                send_msg(s,"commit & push")
+                receive_msg(s)
+                value=input()
+                send_msg(s,value)
+                commit_push(s,username,value)
 
-        if request == "create repository":
-            send_msg(s, request)
-            create_repository(s,username)
-        if request == "commit & push":
-            send_msg(s,request)
-            receive_msg(s)
-            value=input()
-            send_msg(s,value)
-            commit_push(s,username,value)
-
-        if request == "add contributor":
-            send_msg(s,request)
-            add_contributor_to_repository(s,username)
-        if request == "pull":
-            send_msg(s,request)
-            pull(s,username)
-        if request == "show commits":
-            print("enter repository name")
-            repository=input()
-            show_commits(username,repository)
-        if request == "sync":
-            send_msg(s,request)
-            sync(s,username)
-        if request == "create sub directory":
-            send_msg(s,request)
-            create_sub_directory(s,username)
+            if request == "5":
+                send_msg(s,"add contributor")
+                add_contributor_to_repository(s,username)
+            if request == "1":
+                send_msg(s,"pull")
+                pull(s,username)
+            if request == "6":
+                print("enter repository name")
+                repository=input()
+                show_commits(username,repository)
+            if request == "7":
+                send_msg(s,"sync")
+                sync(s,username)
+            if request == "4":
+                send_msg(s,"create sub directory")
+                create_sub_directory(s,username)
 
 
 
@@ -113,6 +114,10 @@ def sync(s,username):
     receive_msg(s)
     send_msg(s, input())
 
+    access=receive_msg(s)
+    if access=="private repository access failed!":
+        return
+
     receive_msg(s)
     file_name=input()
     send_msg(s, file_name)
@@ -143,6 +148,11 @@ def pull(s,username):
     receive_msg(s)
     repository=input()
     send_msg(s,repository)
+
+    access=receive_msg(s)
+
+    if access == "private repository access failed!":
+        return
 
     number_folder=int(receive_msg(s))
 
@@ -176,7 +186,7 @@ def add_contributor_to_repository(s,username):
     receive_msg(s)
     send_msg(s, input())
     receive_msg(s)
-    send_msg(s, input())
+
 
 
 def convert_file_to_text(path):
@@ -335,6 +345,9 @@ def create_repository(s,username):
     repositoryName=input()
     send_msg(s,repositoryName)
     receive_msg(s)
+    send_msg(s,input())
+    receive_msg(s)
+
 
 def show_commits(username,repository):
     parent_dir="client-side"
