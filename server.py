@@ -89,29 +89,33 @@ def login(conn):
 
     if username in dictionary.keys() and password == dictionary[username]:
 
-        send_msg(conn, "login successfull \nchoose your operation \n0.exit\n1.pull\n2.commit & push\n3.create repository\n4.create sub directory\n5.add contributor\n6.show commits\n7.sync\n")
-        operation=receive_msg(conn)
-        if operation == "create repository":
-            print("[REQUEST] create repository")
-            create_repository(conn,username)
-        if operation == "commit & push":
-            print("[REQUEST] commit & push")
-            send_msg(conn,"1.owner of repository 2.contributor")
-            value=receive_msg(conn)
-            commit_push(conn,username,value)
-        if operation == "add contributor":
-            print("[REQUEST] add contributor")
-            add_contibutor_to_repository(conn,username)
-        if operation == "pull":
-            print("[REQUEST] pull")
-            pull(conn,username)
-        if operation == "sync":
-            print("[REQUEST] Sync")
-            check_sync(conn,username)
-        if operation == "create sub directory":
-            print("[REQUEST] create sub directory")
-            create_sub_directory(conn,username)
-        # return 0
+        send_msg(conn,"login successfull \nchoose your operation \n0.exit\n1.pull\n2.commit & push\n3.create repository\n4.create sub directory\n5.add contributor\n6.show commits\n7.sync\n")
+
+        while True:
+            operation=receive_msg(conn)
+            if operation == "create repository":
+                print("[REQUEST] create repository")
+                create_repository(conn,username)
+            if operation == "commit & push":
+                print("[REQUEST] commit & push")
+                send_msg(conn,"1.owner of repository 2.contributor")
+                value=receive_msg(conn)
+                commit_push(conn,username,value)
+            if operation == "add contributor":
+                print("[REQUEST] add contributor")
+                add_contibutor_to_repository(conn,username)
+            if operation == "pull":
+                print("[REQUEST] pull")
+                pull(conn,username)
+            if operation == "sync":
+                print("[REQUEST] Sync")
+                check_sync(conn,username)
+            if operation == "create sub directory":
+                print("[REQUEST] create sub directory")
+                create_sub_directory(conn,username)
+            if operation == "exit":
+                return
+            # end while
     else:
         send_msg(conn,"Login unsuccessful - invalid username or password")
         print("invalid username or password")
@@ -213,9 +217,9 @@ def check_sync(conn,username):
 
     print(maximum)
     target_file_content=convert_file_to_text(os.path.join(directory,maximum))
-    print("target {}".format(target_file_content))
+    # print("target {}".format(target_file_content))
     receive_file_content=receive_msg(conn)
-    print("receive {}".format(receive_file_content))
+    # print("receive {}".format(receive_file_content))
     if target_file_content == receive_file_content:
         send_msg(conn,"file is already update!")
 
@@ -393,7 +397,7 @@ def create_repository(conn,username):
     access_file=os.path.join(path1,access_file)
     f=open(access_file,"w")
     if show == "private":
-        f.write(show)
+        f.write(show+"\n")
     f.write(username)
     # f.write("\n")
     f.close()
@@ -437,7 +441,6 @@ def check_access(owner,username,repository):
         return 0
     else:
         return 1
-
 
 
 if __name__ == '__main__':

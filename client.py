@@ -43,12 +43,15 @@ def choose_operation(s):
         if msg=="Login unsuccessful - invalid username or password":
             return
 
+
         while True:
             print("select operation")
             request = input()
+
             if request == "3":
                 send_msg(s, "create repository")
                 create_repository(s,username)
+
             if request == "2":
                 send_msg(s,"commit & push")
                 receive_msg(s)
@@ -59,22 +62,26 @@ def choose_operation(s):
             if request == "5":
                 send_msg(s,"add contributor")
                 add_contributor_to_repository(s,username)
+
             if request == "1":
                 send_msg(s,"pull")
                 pull(s,username)
+
             if request == "6":
                 print("enter repository name")
                 repository=input()
                 show_commits(username,repository)
+
             if request == "7":
                 send_msg(s,"sync")
                 sync(s,username)
+
             if request == "4":
                 send_msg(s,"create sub directory")
                 create_sub_directory(s,username)
-            if request == "0":
-                return
 
+            if request == "0":
+                break
 
 
 
@@ -358,9 +365,6 @@ def show_commits(username,repository):
     repository+=".txt"
     dir=os.path.join(parent_dir,repository)
     print(convert_file_to_text(dir))
-
-
-
 
 if __name__ == '__main__':
     main()
