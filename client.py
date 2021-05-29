@@ -182,9 +182,14 @@ def add_contributor_to_repository(s,username):
 def convert_file_to_text(path):
     f = open(path, 'r')
     Lines = f.readlines()
-    text=""
+    text = ""
+    # num = 0
     for line in Lines:
-        text += line+"\n"
+        # num += 1
+        # if num != len(Lines):
+        #     text += line + "\n"
+        # else:
+        text += line
 
     return text
 

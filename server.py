@@ -206,7 +206,9 @@ def check_sync(conn,username):
 
     print(maximum)
     target_file_content=convert_file_to_text(os.path.join(directory,maximum))
+    print("target {}".format(target_file_content))
     receive_file_content=receive_msg(conn)
+    print("receive {}".format(receive_file_content))
     if target_file_content == receive_file_content:
         send_msg(conn,"file is already update!")
 
@@ -251,9 +253,14 @@ def pull(conn,username):
 def convert_file_to_text(path):
     f = open(path, 'r')
     Lines = f.readlines()
-    text=""
+    text = ""
+    # num = 0
     for line in Lines:
-        text += line+"\n"
+        # num += 1
+        # if num != len(Lines):
+        #     text += line + "\n"
+        # else:
+        text += line
 
     return text
 
