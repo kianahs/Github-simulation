@@ -72,6 +72,8 @@ def choose_operation(s):
             if request == "4":
                 send_msg(s,"create sub directory")
                 create_sub_directory(s,username)
+            if request == "0":
+                return
 
 
 

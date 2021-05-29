@@ -89,7 +89,7 @@ def login(conn):
 
     if username in dictionary.keys() and password == dictionary[username]:
 
-        send_msg(conn, "login successfull \nchoose your operation \n1.pull\n2.commit & push\n3.create repository\n4.create sub directory\n5.add contributor\n6.show commits\n7.sync\n")
+        send_msg(conn, "login successfull \nchoose your operation \n0.exit\n1.pull\n2.commit & push\n3.create repository\n4.create sub directory\n5.add contributor\n6.show commits\n7.sync\n")
         operation=receive_msg(conn)
         if operation == "create repository":
             print("[REQUEST] create repository")
